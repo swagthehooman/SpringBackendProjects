@@ -36,7 +36,7 @@ public class TaskControllers {
         }
     }
 
-    @PutMapping("/createtask")
+    @PostMapping("/createtask")
     public ResponseEntity<Task> createTask(@RequestBody TaskDTO taskToCreate) {
         Task createdTask = taskLogics.createTask(taskToCreate);
         return new ResponseEntity<>(createdTask, HttpStatus.OK);
@@ -44,6 +44,7 @@ public class TaskControllers {
 
     @PostMapping("/updatetask")
     public ResponseEntity<Task> updateTask(@RequestBody TaskDTO taskToUpdate) {
-        return new ResponseEntity<>(null, HttpStatus.OK);
+        Task updatedTask = taskLogics.updateTask(taskToUpdate);
+        return new ResponseEntity<>(updatedTask, HttpStatus.OK);
     }
 }

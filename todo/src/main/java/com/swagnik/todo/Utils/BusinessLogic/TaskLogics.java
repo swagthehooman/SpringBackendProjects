@@ -43,17 +43,26 @@ public class TaskLogics {
         Task taskObj = new Task();
         try {
             Optional<Task> taskOptional = taskRepository.findById(taskToUpdate.getId());
+            taskObj.setId(taskOptional.get().getId());
+            taskObj.setName(taskOptional.get().getName());
+            taskObj.setOwner(taskOptional.get().getOwner());
+            taskObj.setCreatedOnDate(taskOptional.get().getCreatedOnDate());
+
             if (taskOptional.isPresent()) {
                 if (taskToUpdate.getTaskCompletionDate() != null)
                     taskObj.setTaskCompletionDate(taskToUpdate.getTaskCompletionDate());
                 if (taskToUpdate.getName() != null)
-                    taskObj.setName(taskObj.getName());
+                    taskObj.setName(taskToUpdate.getName());
                 if (taskToUpdate.getStatus() != null && taskToUpdate.getStatus().equals(Status.COMPLETED.getValue())) {
                     taskObj.setStatus(Status.COMPLETED.getValue());
                     taskObj.setCompletedOnDate(new Date());
                 }
                 if (taskToUpdate.getStatus() != null && !taskToUpdate.getStatus().equals(Status.COMPLETED.getValue()))
                     taskObj.setStatus(taskToUpdate.getStatus());
+
+                // save the task
+                return taskRepository.save(taskObj);
+
             }
         } catch (Exception e) {
             System.console().writer().println(e);
