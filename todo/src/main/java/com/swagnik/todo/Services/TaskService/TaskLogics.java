@@ -1,4 +1,4 @@
-package com.swagnik.todo.Utils.BusinessLogic;
+package com.swagnik.todo.Services.TaskService;
 
 import java.util.Date;
 import java.util.List;

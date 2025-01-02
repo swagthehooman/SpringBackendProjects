@@ -15,6 +15,7 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -25,6 +26,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
+@EqualsAndHashCode
 public class User {
 
     @Id
@@ -33,11 +35,10 @@ public class User {
     private String email;
     private String username;
     private String password;
-    private Boolean isActive;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "user_role_junction", joinColumns = {
             @JoinColumn(columnDefinition = "user_id") }, inverseJoinColumns = {
                     @JoinColumn(columnDefinition = "role_id") })
-    private Set<Role> authorities;
+    private Set<Role> roles;
 }

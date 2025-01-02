@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.swagnik.todo.DTOs.TaskDTO;
 import com.swagnik.todo.Models.Task;
-import com.swagnik.todo.Utils.BusinessLogic.TaskLogics;
+import com.swagnik.todo.Services.TaskService.TaskLogics;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
