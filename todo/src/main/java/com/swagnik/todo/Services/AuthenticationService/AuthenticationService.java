@@ -25,6 +25,8 @@ public class AuthenticationService {
     private IUserRepository userRepository;
     @Autowired
     private AuthenticationManager authenticationManager;
+    @Autowired
+    private TokenGenerationService tokenGenerationService;
 
     public UserCredentialsDTO createUser(UserAuthDTO authDetails) {
         User user = new User();
@@ -36,15 +38,21 @@ public class AuthenticationService {
         user.setRoles(roles);
 
         user = userRepository.save(user);
+        String token = generateJWTForUser(authDetails.getEmail(), authDetails.getPassword());
 
-        return new UserCredentialsDTO();
+        return new UserCredentialsDTO(user.getEmail(), user.getUsername(), token);
 
+    }
+
+    public UserCredentialsDTO loginUser(UserAuthDTO authDetails) {
+        String token = generateJWTForUser(authDetails.getEmail(), authDetails.getPassword());
+        return new UserCredentialsDTO(authDetails.getEmail(), authDetails.getUsername(), token);
     }
 
     private String generateJWTForUser(String email, String password) {
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(email, password));
 
-        return "";
+        return tokenGenerationService.generateJwt(auth);
     }
 }
