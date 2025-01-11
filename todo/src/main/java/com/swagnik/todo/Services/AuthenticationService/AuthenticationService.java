@@ -26,7 +26,7 @@ public class AuthenticationService {
     @Autowired
     private AuthenticationManager authenticationManager;
     @Autowired
-    private TokenGenerationService tokenGenerationService;
+    private TokenService tokenService;
 
     public UserCredentialsDTO createUser(UserAuthDTO authDetails) {
         User user = new User();
@@ -53,6 +53,6 @@ public class AuthenticationService {
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(email, password));
 
-        return tokenGenerationService.generateJwt(auth);
+        return tokenService.generateJwt(auth);
     }
 }
