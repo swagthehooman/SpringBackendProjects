@@ -1,5 +1,8 @@
 package com.swagnik.todo.Configs;
 
+import java.time.Duration;
+import java.time.Instant;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,8 +15,14 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder.BCryptVersion;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.JwtTimestampValidator;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
@@ -46,9 +55,11 @@ public class SecurityConfigs {
             request.anyRequest().authenticated();
         });
         http.oauth2ResourceServer(
-                oauth2 -> oauth2.jwt(jwt -> {
-                    jwt.jwtAuthenticationConverter(jwtAuthenticationConverter());
-                }));
+                oauth2 -> {
+                    oauth2.jwt(jwt -> {
+                        jwt.jwtAuthenticationConverter(jwtAuthenticationConverter());
+                    });
+                });
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         return http.build();
     }
@@ -68,7 +79,13 @@ public class SecurityConfigs {
 
     @Bean
     JwtDecoder jwtDecoder() {
-        return NimbusJwtDecoder.withPublicKey(keyProperties.getPublicKey()).build();
+        NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withPublicKey(keyProperties.getPublicKey()).build();
+        OAuth2TokenValidator<Jwt> withClockSkew = new DelegatingOAuth2TokenValidator<>(
+                // tokenExpirationWindowValidation
+                new JwtTimestampValidator(Duration.ofSeconds(10)));
+        jwtDecoder.setJwtValidator(withClockSkew);
+
+        return jwtDecoder;
     }
 
     @Bean
@@ -87,4 +104,23 @@ public class SecurityConfigs {
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
         return jwtAuthenticationConverter;
     }
+
+    private static class TokenExpirationValidator implements OAuth2TokenValidator<Jwt> {
+        OAuth2Error error = new OAuth2Error("custom_code", "Custom error message", null);
+
+        @Override
+        public OAuth2TokenValidatorResult validate(Jwt jwt) {
+            if (jwt.getExpiresAt().isAfter(Instant.now())) {
+                System.out.println(jwt.getExpiresAt());
+                return OAuth2TokenValidatorResult.success();
+            } else {
+                return OAuth2TokenValidatorResult.failure(error);
+            }
+        }
+    }
+
+    public OAuth2TokenValidator<Jwt> validateTokenWindow() {
+        return new TokenExpirationValidator();
+    }
+
 }

@@ -36,7 +36,7 @@ public class UserAuthController {
         UserCredentialsDTO userDetails = null;
         try {
             userDetails = authenticationService.createUser(loginCredentials);
-            return new ResponseEntity<>(userDetails, HttpStatus.CREATED);
+            return new ResponseEntity<>(userDetails, HttpStatus.ACCEPTED);
         } catch (Exception e) {
             return new ResponseEntity<>(userDetails, HttpStatus.UNAUTHORIZED);
         }
